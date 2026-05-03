@@ -16,6 +16,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
+                            <h6 class="text-primary border-bottom pb-2">{{ __('Basic Information') }}</h6>
                             <p><strong>Student ID / Admission No:</strong> {{ $student->admission_number }}</p>
                             @if($student->application)
                                 <p><strong>Application Number:</strong> {{ $student->application->application_number }}</p>
@@ -29,6 +30,7 @@
                             <p><strong>Contact Number:</strong> {{ $student->contact_number }}</p>
                         </div>
                         <div class="col-md-6">
+                            <h6 class="text-primary border-bottom pb-2">{{ __('Emergency & Status') }}</h6>
                             <p><strong>Emergency Contact:</strong> {{ $student->emergency_contact }}</p>
                             <p><strong>Address:</strong> {{ $student->address }}</p>
                             <p><strong>Check-in Date:</strong> {{ $student->check_in_date->format('M d, Y') }}</p>
@@ -42,7 +44,40 @@
                             <p><strong>Email:</strong> {{ $student->user->email }}</p>
                         </div>
                     </div>
-                    
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6 class="text-primary border-bottom pb-2">{{ __('Demographics') }}</h6>
+                            <p><strong>Date of Birth:</strong> {{ $student->date_of_birth ? $student->date_of_birth->format('M d, Y') : 'Not Provided' }}</p>
+                            <p><strong>Nationality:</strong> {{ $student->nationality ?? 'Not Provided' }}</p>
+                            <p><strong>State of Origin:</strong> {{ $student->state_of_origin ?? 'Not Provided' }}</p>
+                            <p><strong>LGA:</strong> {{ $student->local_government ?? 'Not Provided' }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary border-bottom pb-2">{{ __('Medical Profile') }}</h6>
+                            <p><strong>Blood Group:</strong> {{ $student->blood_group ?? 'Not Provided' }}</p>
+                            <p><strong>Genotype:</strong> {{ $student->genotype ?? 'Not Provided' }}</p>
+                            <p><strong>Medical Conditions:</strong> {{ $student->medical_conditions ? Str::limit($student->medical_conditions, 50) : 'None Reported' }}</p>
+                            <p><strong>Disability:</strong> {{ $student->has_disability ? 'Yes' : 'No' }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6 class="text-primary border-bottom pb-2">{{ __('Parent / Guardian Information') }}</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Name:</strong> {{ $student->parent_name ?? 'Not Provided' }}</p>
+                                    <p><strong>Relationship:</strong> {{ $student->parent_relationship ?? 'Not Provided' }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Phone:</strong> {{ $student->parent_phone ?? 'Not Provided' }}</p>
+                                    <p><strong>Email:</strong> {{ $student->parent_email ?? 'Not Provided' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <hr>
                     
                     <div class="row mt-4">

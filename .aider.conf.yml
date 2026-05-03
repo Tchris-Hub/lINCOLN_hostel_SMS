@@ -1,0 +1,7 @@
+# Aider Configuration for Lincoln Hostel
+# SINGLE SOURCE OF TRUTH: AGENTS.md
+
+system_prompt: AGENTS.md
+map-tokens: 1024
+auto-commits: false
+verify-ssl: true

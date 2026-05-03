@@ -31,20 +31,20 @@ class HostelSeeder extends Seeder
                 'status' => 'active',
             ],
             [
-                'name' => 'Girls Hostel',
-                'code' => 'GHS',
+                'name' => 'East Wing Hostel',
+                'code' => 'EWH',
                 'type' => 'female',
                 'address' => 'Army Estate Phase 1',
-                'description' => 'Mixed hostel with separate floors for male and female students.',
+                'description' => 'Modern facility with separate wings.',
                 'status' => 'active',
             ],
             [
-                'name' => 'Girls Hostel',
-                'code' => 'GHS',
+                'name' => 'West Wing Annex',
+                'code' => 'WWA',
                 'type' => 'female',
                 'address' => 'Army Estate Phase 2',
                 'description' => 'Additional hostel facility for overflow accommodation.',
-                'status' => 'maintenance',
+                'status' => 'active',
             ],
         ];
 

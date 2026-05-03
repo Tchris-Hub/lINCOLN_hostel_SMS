@@ -162,7 +162,6 @@
                                 <tr>
                                     <th>Name</th>
                                     <th>Department</th>
-                                    <th>Contact</th>
                                     <th>Check-in Date</th>
                                     <th>Status</th>
                                 </tr>
@@ -177,12 +176,10 @@
                                             </div>
                                             <div>
                                                 <strong>{{ $roommate->full_name }}</strong>
-                                                <br><small class="text-muted">{{ $roommate->admission_number }}</small>
                                             </div>
                                         </div>
                                     </td>
                                     <td>{{ $roommate->department }}</td>
-                                    <td>{{ $roommate->contact_number ?? 'N/A' }}</td>
                                     <td>{{ $roommate->formatted_check_in_date }}</td>
                                     <td>{!! $roommate->status_badge !!}</td>
                                 </tr>

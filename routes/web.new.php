@@ -18,7 +18,8 @@ use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\StudentsAuthController;
 use App\Http\Controllers\StudentPaymentController;
-use App\Http\Controllers\StudentComplaintController;
+use App\\Http\\Controllers\\StudentComplaintController;
+use App\\Http\\Controllers\\StudentControllerNew;
 use App\Http\Controllers\HostelApplicationController;
 use App\Http\Controllers\StudentsDashboardController;
 use App\Http\Controllers\SuperAdmin\AdminManagementController;
@@ -72,6 +73,7 @@ Route::middleware(['admin'])->group(function () {
     });
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard-new', [DashboardControllerNew::class, 'index'])->name('dashboard.new.index');
 
     Route::resources([
         'hostels'    => HostelController::class,
@@ -305,21 +307,4 @@ Route::prefix('superadmin')->name('superadmin.')->middleware('web')->group(funct
     });
 });
 
-
-// Added on 2026-04-29: Dynamic Departments/Intakes + Safe Student Directory
-Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/departments', [\App\Http\Controllers\Admin\DepartmentController::class, 'index'])->name('departments.index');
-    Route::post('/departments', [\App\Http\Controllers\Admin\DepartmentController::class, 'store'])->name('departments.store');
-    Route::put('/departments/{department}', [\App\Http\Controllers\Admin\DepartmentController::class, 'update'])->name('departments.update');
-    Route::delete('/departments/{department}', [\App\Http\Controllers\Admin\DepartmentController::class, 'destroy'])->name('departments.destroy');
-
-    Route::get('/intakes', [\App\Http\Controllers\Admin\IntakeController::class, 'index'])->name('intakes.index');
-    Route::post('/intakes', [\App\Http\Controllers\Admin\IntakeController::class, 'store'])->name('intakes.store');
-    Route::put('/intakes/{intake}', [\App\Http\Controllers\Admin\IntakeController::class, 'update'])->name('intakes.update');
-    Route::delete('/intakes/{intake}', [\App\Http\Controllers\Admin\IntakeController::class, 'destroy'])->name('intakes.destroy');
-});
-
-Route::prefix('student')->name('student.')->middleware('student.auth')->group(function () {
-    Route::get('/directory', [\App\Http\Controllers\StudentsDashboardController::class, 'directory'])->name('directory');
-});
 

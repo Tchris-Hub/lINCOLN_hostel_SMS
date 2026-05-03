@@ -13,7 +13,6 @@ class RoomController extends Controller
         $hostelId = $request->get('hostel_id');
 
         $rooms = Room::with('hostel')
-            ->withCount('students')
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('room_number', 'like', '%' . $search . '%')

@@ -228,11 +228,15 @@ class PaymentController extends Controller
                 ['payment_id' => $payment->id, 'room_id' => $room->id]
             );
 
+            // Notify Parent (Rule 2.5)
+            $this->notifyParentOfPayment($student, "LincHostel: Your ward {$student->full_name}'s room booking payment has been approved. Room {$room->room_number} assigned.");
+
             return redirect()->back()->with('success', 'Payment approved! Room ' . $room->room_number . ' has been assigned to ' . $student->full_name . '.');
             
         } else {
             // Regular payment (not a booking)
             $payment->update(['status' => 'completed']);
+            $student = $payment->student;
 
             // Notify Student
             \App\Models\Notification::notifyStudent(
@@ -243,7 +247,33 @@ class PaymentController extends Controller
                 ['payment_id' => $payment->id]
             );
 
+            // Notify Parent (Rule 2.5)
+            $this->notifyParentOfPayment($student, "LincHostel: Your ward {$student->full_name}'s payment of ₦" . number_format($payment->amount, 2) . " has been approved.");
+
             return redirect()->back()->with('success', 'Payment approved successfully.');
+        }
+    }
+
+    /**
+     * Notify parent with failover logic (Rule 2.5)
+     */
+    private function notifyParentOfPayment($student, $message)
+    {
+        try {
+            $student->load('hostelApplication');
+            $parentPhone = $student->parent_phone;
+
+            // Failover to hostel_applications (Rule 2.5)
+            if ((empty($parentPhone) || $parentPhone === 'N/A') && $student->hostelApplication) {
+                $parentPhone = $student->hostelApplication->parent_phone;
+            }
+
+            if (!empty($parentPhone) && $parentPhone !== 'N/A') {
+                $smsService = new \App\Services\SmsService();
+                $smsService->sendSms($parentPhone, $message);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send parental payment notification: ' . $e->getMessage());
         }
     }
 

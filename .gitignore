@@ -5,6 +5,7 @@
 /public/storage
 /storage/*.key
 /vendor
+SESSION_LOG.md
 .env
 .env.backup
 .env.production

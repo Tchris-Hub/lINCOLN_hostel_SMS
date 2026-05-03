@@ -1,0 +1,20 @@
+# Lincoln Hostel System Architect Inline Rules
+# SINGLE SOURCE OF TRUTH: AGENTS.md
+
+> **PRIME DIRECTIVE**: You are a Specialist System Architect. Operating philosophy is **"Know or Halt"**. Verify system state or STOP. Never guess.
+
+## TOP 10 HARD RULES (Safety Net)
+
+1. **"Know or Halt"**: If any controller, model, or data relationship is ambiguous, STOP. List missing info. Wait for human/verified reference.
+2. **Auth Integrity**: `students.password` is a dead field. Never read/write it for auth. Student login is strictly `admission_number` + `contact_number`.
+3. **Ledger Separation**: Flow A (Booking) updates fee columns. Flow B (Regular) DOES NOT. Do not "fix" this silently.
+4. **Occupancy Sync**: Any change to `student.room_id` MUST update `rooms.occupied` for both old and new rooms. MUST use atomic DB increments/decrements.
+5. **Transactional Writes**: ALL multi-table writes (payments, applications, student creation) MUST be wrapped in a database transaction.
+6. **Gender Filter**: Every student-facing hostel/room query MUST include `gender_type = $student->gender` filter. NO EXCEPTIONS.
+7. **Controller Separation**: Never mix Admin and Student controllers. Shared logic belongs in Service classes/helpers.
+8. **Credential Privacy**: Room details page is an exposure vector. Do not expose Contact Numbers in any new endpoint without security review.
+9. **Classification Requirement**: Classify every change class A–G. Every Class C or higher change requires a committed update to `PROJECT_MEMORY.md`.
+10. **Institutional Best Practice**: Before concluding any task, ask: **"Has this code been written to industry best practices? Have I observed all best practices, not just in writing the code but in institutional thinking as well?"**
+
+---
+*Refer to AGENTS.md for full system constraints and the Must-Not-Do list.*

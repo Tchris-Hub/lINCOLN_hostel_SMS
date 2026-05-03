@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# Lincoln Hostel Governance Guard
+# Protects AGENTS.md and KNOWN_ISSUES.md from accidental modification.
+
+STAGED_GOVERNANCE_FILES=$(git diff --cached --name-only | grep -E '^(AGENTS\.md|KNOWN_ISSUES\.md)$')
+
+if [ -n "$STAGED_GOVERNANCE_FILES" ]; then
+    echo "========================================================================"
+    echo "⚠️  WARNING: YOU ARE MODIFYING GOVERNANCE FILES"
+    echo "========================================================================"
+    echo "The following files are core architectural documents:"
+    echo "$STAGED_GOVERNANCE_FILES"
+    echo ""
+    echo "Any change to these files must be approved by the System Architect."
+    echo "This commit will block by default to ensure awareness."
+    echo ""
+    echo "To proceed with these changes, use: git commit --no-verify"
+    echo "========================================================================"
+    exit 1
+fi
+
+exit 0

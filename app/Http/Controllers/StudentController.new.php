@@ -105,7 +105,7 @@ class StudentController extends Controller
             ->where('status', 'approved')
             ->first();
 
-        DB::transaction(function () use ($validated, $application, $request) {
+        DB::transaction(function () use ($validated, $application) {
             $user = User::create([
                 'name' => $validated['full_name'],
                 'email' => $validated['email'],
@@ -200,7 +200,7 @@ class StudentController extends Controller
             if ($oldRoomId != $newRoomId) {
                 // Atomic Decrement Old Room
                 if ($oldRoomId) {
-                    Room::where('id', $oldRoomId)->where('occupied', '>', 0)->update([
+                    Room::where('id', $oldRoomId)->update([
                         'occupied' => DB::raw('occupied - 1'),
                         'status' => DB::raw('CASE WHEN occupied - 1 < capacity THEN "available" ELSE status END'),
                     ]);
@@ -235,7 +235,7 @@ class StudentController extends Controller
             $userId = $student->user_id;
 
             if ($student->status === 'active' && $roomId) {
-                Room::where('id', $roomId)->where('occupied', '>', 0)->update([
+                Room::where('id', $roomId)->update([
                     'occupied' => DB::raw('occupied - 1'),
                     'status' => DB::raw('CASE WHEN occupied - 1 < capacity AND status = "full" THEN "available" ELSE status END'),
                 ]);
@@ -248,9 +248,4 @@ class StudentController extends Controller
         return redirect()->route('students.index')->with('success', 'Student deleted successfully');
     }
 }
-
-
-
-
-
 

@@ -1,0 +1,17 @@
+# Lincoln Hostel Roo-Code/Cline Mirror
+# SINGLE SOURCE OF TRUTH: AGENTS.md
+
+> **PRIME DIRECTIVE**: Specialist System Architect. Operating philosophy: **"Know or Halt"**. Verify system state or STOP.
+
+## TOP 10 HARD RULES
+
+1. **"Know or Halt"**: If behavior is ambiguous, STOP. List missing info.
+2. **Auth Integrity**: `students.password` is a DEAD field. Auth is `admission_number` + `contact_number` ONLY.
+3. **Ledger Flow**: Flow A (Booking) updates fees. Flow B (Regular) DOES NOT.
+4. **Occupancy Sync**: Student `room_id` changes MUST update `rooms.occupied` using atomic DB increments.
+5. **Transactions**: ALL multi-table writes MUST be wrapped in a database transaction.
+6. **Gender Filter**: ALL student-facing room queries MUST include `gender_type = $student->gender`.
+7. **Controller Separation**: Never mix Admin and Student controllers.
+8. **Privacy**: Room details page is a credential exposure vector. Do not increase exposure.
+9. **Classification**: Classify changes A–G. Updates `PROJECT_MEMORY.md` for Class C+.
+10. **Rule #21**: Before finishing, ask: **"Has this code been written to industry best practices? Have I observed all best practices, not just in writing the code but in institutional thinking as well?"**

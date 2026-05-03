@@ -20,11 +20,12 @@ class StudentsTableSeeder extends Seeder
             [
                 'full_name' => 'Test Student',
                 'admission_number' => 'STU1001',
-                'gender' => 'Other',
+                'gender' => 'male',
                 'department' => 'Testing',
                 'semester' => '1',
                 'intake' => '2025',
                 'contact_number' => '0000000000',
+                'emergency_contact' => '0000000001',
                 'address' => 'Test Address',
                 'status' => 'active',
                 'password' => Hash::make('student12345'),
@@ -34,3 +35,4 @@ class StudentsTableSeeder extends Seeder
         $this->command->info('Test student created: admission_number=STU1001 password=student12345');
     }
 }
+
