@@ -14,6 +14,7 @@ class HostelApplication extends Model
         'application_number',
         'status',
         'admin_notes',
+        'rejection_reason',
         'reviewed_at',
         'reviewed_by',
         
@@ -132,6 +133,14 @@ class HostelApplication extends Model
     public function reviewer()
     {
         return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    /**
+     * Get the student associated with this application
+     */
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'student_id');
     }
 
     /**

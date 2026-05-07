@@ -45,6 +45,11 @@ class Room extends Model
         return $this->hasMany(Student::class);
     }
 
+    public function beds()
+    {
+        return $this->hasMany(Bed::class);
+    }
+
     /**
      * Get count of students actually assigned to this room
      * Note: Use $room->students_count for relationship count

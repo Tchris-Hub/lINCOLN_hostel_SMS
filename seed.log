@@ -1,0 +1,29 @@
+
+   INFO  Seeding database.  
+
+Generated 50 dummy students.
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42S22]: Column not found: 1054 Unknown column 'health_conditions' in 'field list' (Connection: mysql, SQL: insert into `hostel_applications` (`application_number`, `status`, `academic_year`, `amount_paid`, `full_name`, `student_id`, `intake`, `program`, `department`, `gender`, `date_of_birth`, `phone_number`, `email`, `home_address`, `nationality`, `state_of_origin`, `local_government`, `parent_full_name`, `parent_relationship`, `parent_phone`, `parent_email`, `parent_address`, `parent_occupation`, `hostelfee_receipt`, `rejection_reason`, `admin_notes`, `reviewed_at`, `blood_group`, `genotype`, `health_conditions`, `allergies`, `medications`, `emergency_contact_name`, `emergency_contact_phone`, `emergency_contact_relationship`, `emergency_contact_address`, `medical_document_path`, `declaration_name`, `applicant_signature`, `applicant_date`, `guardian_signature`, `guardian_date`, `passport_photo`, `applicationform_receipt`, `medical_report`, `birth_certificate`, `admission_letter`, `updated_at`, `created_at`) values (LH2026050001, pending, 2026/2027, 100000, Doris Rodriguez, 52, July 2026, BSc, Computer Science, Male, 2006-09-18 00:00:00, 08268600213, doris.rodriguez@lincoln.edu.ng, 329 Joanny Spring Apt. 833
+Theresaberg, WY 88823, Nigerian, Lagos, Ikeja, Mr. Griffin Terry, Parent, 07095937473, beaulah.schumm@example.net, 7154 DuBuque River Suite 226
+West Lavinia, IA 96439, Business, receipts/dummy.jpg, ?, ?, ?, A+, SS, ?, ?, ?, Eusebio Wintheiser, 07164551242, Uncle, 543 Rosalia Loaf Apt. 207
+South Kathlyn, AR 79367, ?, Rowena Renner, signature.png, 2026-05-07 00:00:00, signature.png, 2026-05-07 00:00:00, ?, receipts/app_dummy.jpg, ?, ?, ?, 2026-05-07 01:34:28, 2026-05-07 01:34:28))
+
+  at vendor\laravel\framework\src\Illuminate\Database\Connection.php:829
+    825▕                     $this->getName(), $query, $this->prepareBindings($bindings), $e
+    826▕                 );
+    827▕             }
+    828▕ 
+  ➜ 829▕             throw new QueryException(
+    830▕                 $this->getName(), $query, $this->prepareBindings($bindings), $e
+    831▕             );
+    832▕         }
+    833▕     }
+
+  1   vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:39
+      PDOException::("SQLSTATE[42S22]: Column not found: 1054 Unknown column 'health_conditions' in 'field list'")
+
+  2   vendor\laravel\framework\src\Illuminate\Database\MySqlConnection.php:39
+      PDO::prepare("insert into `hostel_applications` (`application_number`, `status`, `academic_year`, `amount_paid`, `full_name`, `student_id`, `intake`, `program`, `department`, `gender`, `date_of_birth`, `phone_number`, `email`, `home_address`, `nationality`, `state_of_origin`, `local_government`, `parent_full_name`, `parent_relationship`, `parent_phone`, `parent_email`, `parent_address`, `parent_occupation`, `hostelfee_receipt`, `rejection_reason`, `admin_notes`, `reviewed_at`, `blood_group`, `genotype`, `health_conditions`, `allergies`, `medications`, `emergency_contact_name`, `emergency_contact_phone`, `emergency_contact_relationship`, `emergency_contact_address`, `medical_document_path`, `declaration_name`, `applicant_signature`, `applicant_date`, `guardian_signature`, `guardian_date`, `passport_photo`, `applicationform_receipt`, `medical_report`, `birth_certificate`, `admission_letter`, `updated_at`, `created_at`) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ...")
+

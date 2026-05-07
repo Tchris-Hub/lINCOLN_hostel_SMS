@@ -21,6 +21,7 @@ class Student extends Authenticatable
     protected $fillable = [
         'user_id',
         'room_id',
+        'bed_id',
         'admission_number',
         'full_name',
         'email',
@@ -99,6 +100,11 @@ class Student extends Authenticatable
     public function room()
     {
         return $this->belongsTo(Room::class);
+    }
+
+    public function bed()
+    {
+        return $this->belongsTo(Bed::class);
     }
 
     public function payments()

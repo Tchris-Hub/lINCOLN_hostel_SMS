@@ -18,9 +18,9 @@
                 
                 @if(!$student->room_id)
                     <div class="mt-3">
-                        <a href="{{ route('student.hostels.index') }}" class="btn btn-light fw-bold" style="color: #cc0000;">
-                            <i class="fas fa-search me-2"></i>Find & Book a Room
-                        </a>
+                        <span class="badge bg-white px-3 py-2 rounded-pill" style="color: #cc0000;">
+                            <i class="fas fa-clock me-2"></i>Awaiting Allocation
+                        </span>
                     </div>
                 @else
                     <div class="mt-3">
@@ -34,18 +34,48 @@
         </div>
     </div>
 </div>
-<!-- Pending Booking Alert -->
-@if(isset($pendingBooking) && $pendingBooking)
+<!-- Application Status Alert -->
+@if(isset($application))
 <div class="row mb-4">
     <div class="col-12">
-        <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center mb-0" role="alert" style="background-color: #fff3cd; border-left: 5px solid #ffc107 !important;">
-            <div class="p-2 bg-warning rounded-circle me-3 text-white">
-                <i class="fas fa-clock fa-fw"></i>
+        @php
+            $status_class = [
+                'pending' => 'warning',
+                'under_review' => 'info',
+                'approved' => 'success',
+                'rejected' => 'danger'
+            ][$application->status] ?? 'secondary';
+            
+            $status_icon = [
+                'pending' => 'clock',
+                'under_review' => 'search',
+                'approved' => 'check-circle',
+                'rejected' => 'times-circle'
+            ][$application->status] ?? 'info-circle';
+        @endphp
+        <div class="alert alert-{{ $status_class }} border-0 shadow-sm d-flex align-items-center mb-0" role="alert" style="border-left: 5px solid var(--bs-{{ $status_class }}) !important;">
+            <div class="p-2 bg-{{ $status_class }} rounded-circle me-3 text-white">
+                <i class="fas fa-{{ $status_icon }} fa-fw"></i>
             </div>
-            <div>
-                <h6 class="alert-heading fw-bold mb-1">Room Booking Awaiting Approval</h6>
-                <p class="mb-0">Your request for <strong>Room {{ $pendingBooking->room->room_number }}</strong> in <strong>{{ $pendingBooking->room->hostel->name }}</strong> is currently being reviewed. We will notify you once it's approved.</p>
+            <div class="flex-grow-1">
+                <h6 class="alert-heading fw-bold mb-1">Hostel Application: {{ ucfirst(str_replace('_', ' ', $application->status)) }}</h6>
+                <p class="mb-0">
+                    @if($application->status == 'pending')
+                        Your application <strong>#{{ $application->application_number }}</strong> has been received and is awaiting initial review.
+                    @elseif($application->status == 'under_review')
+                        Admin is currently reviewing your application details and payment proof.
+                    @elseif($application->status == 'approved')
+                        Your application has been approved! You are currently in the queue for room allocation.
+                    @elseif($application->status == 'rejected')
+                        Unfortunately, your application was not approved. Reason: {{ $application->rejection_reason ?? 'No reason provided.' }}
+                    @endif
+                </p>
             </div>
+            @if($application->status == 'approved' && !$student->room_id)
+                <div class="ms-3">
+                    <span class="badge bg-success text-white p-2">Awaiting Bed Assignment</span>
+                </div>
+            @endif
         </div>
     </div>
 </div>
@@ -228,7 +258,7 @@
                     <thead class="bg-light">
                         <tr>
                             <th class="ps-4">Name</th>
-                            <th>Contact</th>
+                            <th>Department</th>
                             <th>Check-in</th>
                         </tr>
                     </thead>
@@ -236,8 +266,8 @@
                         @forelse($student->room->students->where('id', '!=', $student->id) as $roommate)
                         <tr>
                             <td class="ps-4 fw-medium">{{ $roommate->full_name }}</td>
-                            <td>{{ $roommate->email }}</td>
-                            <td>{{ $roommate->check_in_date ? $roommate->check_in_date->format('M d, Y') : '-' }}</td>
+                            <td>{{ $roommate->department }}</td>
+                            <td>{{ $roommate->formatted_check_in_date }}</td>
                         </tr>
                         @empty
                         <tr>

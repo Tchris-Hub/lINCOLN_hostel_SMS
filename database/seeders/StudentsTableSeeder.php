@@ -2,28 +2,24 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Student;
 use Illuminate\Support\Facades\Hash;
 
 class StudentsTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         // Create a test student account for dashboard testing
-        Student::updateOrCreate(
+        $testStudent = Student::updateOrCreate(
             ['admission_number' => 'STU1001'],
             [
                 'full_name' => 'Test Student',
                 'admission_number' => 'STU1001',
-                'gender' => 'male',
+                'gender' => 'Male',
                 'department' => 'Testing',
                 'semester' => '1',
-                'intake' => '2025',
+                'intake' => 'July 2026',
                 'contact_number' => '0000000000',
                 'emergency_contact' => '0000000001',
                 'address' => 'Test Address',
@@ -32,7 +28,34 @@ class StudentsTableSeeder extends Seeder
             ]
         );
 
-        $this->command->info('Test student created: admission_number=STU1001 password=student12345');
+        // Generate 50 dummy students using factory
+        $students = Student::factory()->count(50)->create();
+        
+        $this->command->info('Generated 50 dummy students.');
+
+        // For each student, generate an application and a payment
+        foreach ($students as $student) {
+            $application = \App\Models\HostelApplication::factory()->create([
+                'student_id' => $student->id,
+                'full_name' => $student->full_name,
+                'gender' => $student->gender,
+                'phone_number' => $student->contact_number,
+                'email' => $student->email,
+            ]);
+
+            // Create a matching payment
+            \App\Models\Payment::create([
+                'student_id' => $student->id,
+                'amount' => $application->amount_paid,
+                'payment_method' => 'Bank Transfer',
+                'receipt_number' => 'TXN' . rand(100000, 999999),
+                'receipt_path' => 'receipts/dummy.jpg',
+                'status' => 'completed',
+                'payment_date' => now(),
+                'is_read' => 0,
+            ]);
+        }
+
+        $this->command->info('Generated 50 hostel applications and payments for the students.');
     }
 }
-

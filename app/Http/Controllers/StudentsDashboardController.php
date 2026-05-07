@@ -23,7 +23,7 @@ class StudentsDashboardController extends Controller
         $student = auth()->guard('student')->user();
 
         // Load relationships
-        $student->load(['room.hostel', 'payments', 'complaints', 'leaveRequests', 'attendanceRecords']);
+        $student->load(['room.hostel', 'payments', 'complaints', 'leaveRequests', 'attendanceRecords', 'hostelApplication']);
 
         $complaints = $student->complaints;
         $payments = $student->payments()->latest()->get();
@@ -65,13 +65,7 @@ class StudentsDashboardController extends Controller
             'is_overdue' => $student->isPaymentOverdue(),
         ];
 
-        // Check for pending room booking
-        $pendingBooking = $student->payments()
-            ->where('status', 'pending')
-            ->whereNotNull('room_id')
-            ->with(['room.hostel'])
-            ->latest()
-            ->first();
+        $application = $student->hostelApplication;
 
         return view('student.dashboard', compact(
             'student',
@@ -88,7 +82,7 @@ class StudentsDashboardController extends Controller
             'pending_complaints',
             'recentAttendance',
             'feeInfo',
-            'pendingBooking'
+            'application'
         ));
     }
 
