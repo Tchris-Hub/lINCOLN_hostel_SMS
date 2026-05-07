@@ -334,6 +334,9 @@
                 </a>
 
                 <div class="nav-section-title">Information</div>
+                <a class="nav-link {{ request()->routeIs('student.directory') ? 'active' : '' }}" href="{{ route('student.directory') }}">
+                    <i class="fas fa-users"></i><span>Student Directory</span>
+                </a>
                 <a class="nav-link {{ request()->routeIs('student.announcements.*') ? 'active' : '' }}" href="{{ route('student.announcements.index') }}">
                     <i class="fas fa-bullhorn"></i><span>Announcements</span>
                 </a>

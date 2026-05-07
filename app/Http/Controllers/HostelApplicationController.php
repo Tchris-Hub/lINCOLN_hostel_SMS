@@ -13,11 +13,16 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+use App\Models\Department;
+use App\Models\Intake;
+
 class HostelApplicationController extends Controller
 {
     public function create()
     {
-        return view('apply');
+        $departments = Department::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+        $intakes = Intake::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+        return view('apply', compact('departments', 'intakes'));
     }
 
     public function store(Request $request)

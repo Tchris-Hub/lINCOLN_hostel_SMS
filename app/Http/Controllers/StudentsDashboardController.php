@@ -496,4 +496,37 @@ class StudentsDashboardController extends Controller
 
         return view('student.application.details', compact('student', 'application'));
     }
+
+    /**
+     * Student Directory - View peer students (Safe version)
+     */
+    public function directory(Request $request)
+    {
+        $search = $request->get('search');
+        $department = $request->get('department');
+        
+        $query = \App\Models\Student::where('status', 'active')
+            ->select([
+                'id', 
+                'full_name', 
+                'department', 
+                'semester', 
+                'intake', 
+                'profile_photo', 
+                'gender'
+            ]);
+
+        if ($search) {
+            $query->where('full_name', 'like', "%{$search}%");
+        }
+
+        if ($department) {
+            $query->where('department', $department);
+        }
+
+        $students = $query->orderBy('full_name')->paginate(20);
+        $departments = \App\Models\Department::where('is_active', true)->orderBy('name')->get();
+
+        return view('student.directory', compact('students', 'departments'));
+    }
 }

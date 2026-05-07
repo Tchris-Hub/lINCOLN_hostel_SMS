@@ -112,11 +112,9 @@
                                         name="department" 
                                         required>
                                     <option value="">Select Department</option>
-                                    <option value="Computer Software Engineering" {{ old('department') == 'Computer Software Engineering' ? 'selected' : '' }}>Computer Software Engineering</option>
-                                    <option value="Foundation of Nursing" {{ old('department') == 'Foundation of Nursing' ? 'selected' : '' }}>Foundation of Nursing</option>
-                                    <option value="Business and Banking Operations" {{ old('department') == 'Business and Banking Operations' ? 'selected' : '' }}>Business and Banking Operations</option>
-                                    <option value="English and Mass Communication" {{ old('department') == 'English and Mass Communication' ? 'selected' : '' }}>English and Mass Communication</option>
-                                    <option value="Psychology" {{ old('department') == 'Psychology' ? 'selected' : '' }}>Psychology</option>
+                                    @foreach($departments as $dept)
+                                        <option value="{{ $dept->name }}" {{ old('department') == $dept->name ? 'selected' : '' }}>{{ $dept->name }}</option>
+                                    @endforeach
                                 </select>
                                 @error('department')
                                     <span class="invalid-feedback" role="alert">
@@ -153,21 +151,20 @@
                                 {{ __('Intake') }} <span class="text-danger">*</span>
                             </label>
                             <div class="col-md-6">
-                                <input id="intake" type="text" 
-                                       class="form-control @error('intake') is-invalid @enderror" 
-                                       name="intake" 
-                                       value="{{ old('intake') }}" 
-                                       list="intake_suggestions"
-                                       required
-                                       placeholder="e.g. March 2025">
-                                <datalist id="intake_suggestions">
-                                    <option value="March 2024">
-                                    <option value="July 2024">
-                                    <option value="November 2024">
-                                    <option value="March 2025">
-                                    <option value="July 2025">
-                                    <option value="November 2025">
-                                </datalist>
+                                <select id="intake" 
+                                        class="form-select @error('intake') is-invalid @enderror" 
+                                        name="intake" 
+                                        required>
+                                    <option value="" data-start="" data-end="">Select Intake</option>
+                                    @foreach($intakes as $intake)
+                                        <option value="{{ $intake->name }}" 
+                                                data-start="{{ $intake->start_date ? $intake->start_date->format('Y-m-d') : '' }}" 
+                                                data-end="{{ $intake->end_date ? $intake->end_date->format('Y-m-d') : '' }}"
+                                                {{ old('intake') == $intake->name ? 'selected' : '' }}>
+                                            {{ $intake->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                                 @error('intake')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -542,6 +539,36 @@
         // Existing date logic
         const checkInDate = document.getElementById('check_in_date');
         const checkOutDate = document.getElementById('expected_check_out_date');
+
+        // Auto-fill dates based on Intake selection
+        const intakeSelect = document.getElementById('intake');
+        if (intakeSelect) {
+            intakeSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const startDate = selectedOption.getAttribute('data-start');
+                const endDate = selectedOption.getAttribute('data-end');
+
+                if (startDate && checkInDate) {
+                    checkInDate.value = startDate;
+                    // Trigger change to update min for checkout
+                    checkInDate.dispatchEvent(new Event('change'));
+                }
+                
+                if (endDate && checkOutDate) {
+                    checkOutDate.value = endDate;
+                }
+                
+                // Visual feedback
+                if (startDate || endDate) {
+                    checkInDate.classList.add('is-valid');
+                    checkOutDate.classList.add('is-valid');
+                    setTimeout(() => {
+                        checkInDate.classList.remove('is-valid');
+                        checkOutDate.classList.remove('is-valid');
+                    }, 1500);
+                }
+            });
+        }
 
         if (checkInDate) {
             checkInDate.addEventListener('change', function() {

@@ -486,7 +486,16 @@
 
                     <div class="form-group">
                         <label for="intake">Intake <span class="required-field">*</span></label>
-                        <input type="text" name="intake" id="intake" value="{{ old('intake') }}" required>
+                        @if(isset($intakes) && $intakes->count() > 0)
+                            <select name="intake" id="intake" required>
+                                <option value="">Select Intake</option>
+                                @foreach($intakes as $intake)
+                                    <option value="{{ $intake->name }}" {{ old('intake') == $intake->name ? 'selected' : '' }}>{{ $intake->name }}</option>
+                                @endforeach
+                            </select>
+                        @else
+                            <input type="text" name="intake" id="intake" value="{{ old('intake') }}" placeholder="e.g. July 2026" required>
+                        @endif
                     </div>
 
                     <div class="form-group">
@@ -496,7 +505,16 @@
 
                     <div class="form-group">
                         <label for="department">Department <span class="required-field">*</span></label>
-                        <input type="text" name="department" id="department" value="{{ old('department') }}" required>
+                        @if(isset($departments) && $departments->count() > 0)
+                            <select name="department" id="department" required>
+                                <option value="">Select Department</option>
+                                @foreach($departments as $dept)
+                                    <option value="{{ $dept->name }}" {{ old('department') == $dept->name ? 'selected' : '' }}>{{ $dept->name }}</option>
+                                @endforeach
+                            </select>
+                        @else
+                            <input type="text" name="department" id="department" value="{{ old('department') }}" placeholder="e.g. Computer Science" required>
+                        @endif
                     </div>
                 </div>
             </div>

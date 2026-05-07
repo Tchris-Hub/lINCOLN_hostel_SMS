@@ -360,6 +360,16 @@
                 <a class="nav-link {{ request()->routeIs('rooms.*') ? 'active' : '' }}" href="{{ route('rooms.index') }}">
                     <i class="fas fa-door-open"></i><span>Rooms & Beds</span>
                 </a>
+                
+                <!-- System Setup -->
+                <div class="nav-section-title">System Setup</div>
+                <a class="nav-link {{ request()->routeIs('admin.departments.index') ? 'active' : '' }}" href="{{ route('admin.departments.index') }}">
+                    <i class="fas fa-university"></i><span>Departments</span>
+                </a>
+                <a class="nav-link {{ request()->routeIs('admin.intakes.index') ? 'active' : '' }}" href="{{ route('admin.intakes.index') }}">
+                    <i class="fas fa-calendar-check"></i><span>Intakes</span>
+                </a>
+
                 <a class="nav-link {{ request('type') == 'booking' ? 'active' : '' }}" href="{{ route('payments.index', ['type' => 'booking', 'status' => 'pending']) }}">
                     <i class="fas fa-home"></i><span>Room Bookings</span>
                     @php $pendingBookingsCount = \App\Models\Payment::where('status', 'pending')->whereNotNull('room_id')->count(); @endphp

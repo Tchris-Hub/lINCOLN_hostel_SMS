@@ -9,6 +9,8 @@ use App\Models\HostelApplication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use App\Models\Department;
+use App\Models\Intake;
 use Carbon\Carbon;
 
 class StudentController extends Controller
@@ -56,7 +58,9 @@ class StudentController extends Controller
 
     public function create()
     {
-        return view('students.create');
+        $departments = Department::where('is_active', true)->orderBy('sort_order')->get();
+        $intakes = Intake::where('is_active', true)->orderBy('sort_order')->get();
+        return view('students.create', compact('departments', 'intakes'));
     }
 
     public function store(Request $request)
@@ -150,7 +154,10 @@ class StudentController extends Controller
                 return $room->hostel->name . ' ' . $room->room_number;
             });
 
-        return view('students.edit', compact('student', 'availableRooms'));
+        $departments = Department::where('is_active', true)->orderBy('sort_order')->get();
+        $intakes = Intake::where('is_active', true)->orderBy('sort_order')->get();
+
+        return view('students.edit', compact('student', 'availableRooms', 'departments', 'intakes'));
     }
 
     public function update(Request $request, Student $student)

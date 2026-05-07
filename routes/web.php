@@ -321,5 +321,12 @@ Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function ()
 
 Route::prefix('student')->name('student.')->middleware('student.auth')->group(function () {
     Route::get('/directory', [\App\Http\Controllers\StudentsDashboardController::class, 'directory'])->name('directory');
+    Route::get('/intake-dates/{intake}', function($intakeId) {
+        $intake = \App\Models\Intake::find($intakeId);
+        return response()->json([
+            'start_date' => $intake ? ($intake->start_date ? $intake->start_date->format('Y-m-d') : null) : null,
+            'end_date' => $intake ? ($intake->end_date ? $intake->end_date->format('Y-m-d') : null) : null,
+        ]);
+    })->name('intake-dates');
 });
 
