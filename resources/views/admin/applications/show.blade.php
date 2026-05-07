@@ -26,8 +26,21 @@
             <div class="d-flex gap-2 align-items-center">
                 {!! $application->status_badge !!}
                 @if($application->status === 'pending' || $application->status === 'under_review')
-                <button class="btn btn-success btn-sm" onclick="updateStatus('approved')"><i class="fas fa-check me-1"></i>Approve</button>
-                <button class="btn btn-danger btn-sm" onclick="updateStatus('rejected')"><i class="fas fa-times me-1"></i>Reject</button>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#approveAssignModal">
+                    <i class="fas fa-user-check me-1"></i> Approve & Assign Room
+                </button>
+                <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                    <i class="fas fa-times me-1"></i> Reject
+                </button>
+                @elseif($application->status === 'approved')
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Actions
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-menu-item px-3 text-danger small" href="#" data-bs-toggle="modal" data-bs-target="#rejectModal">Reject (Reverse Approval)</a></li>
+                    </ul>
+                </div>
                 @endif
             </div>
         </div>
@@ -35,6 +48,15 @@
 </div>
 
 <div class="row g-4">
+    @if($application->status === 'rejected')
+    <div class="col-12">
+        <div class="alert alert-danger border-0 shadow-sm mb-0">
+            <h6 class="alert-heading fw-bold"><i class="fas fa-exclamation-circle me-2"></i>Application Rejected</h6>
+            <p class="mb-0"><strong>Reason:</strong> {{ $application->rejection_reason }}</p>
+        </div>
+    </div>
+    @endif
+
     <!-- Student Information -->
     <div class="col-md-6">
         <div class="card border-0 shadow-sm h-100">
@@ -44,33 +66,41 @@
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-6"><label class="text-muted small">Full Name</label><p class="mb-0 fw-semibold">{{ $application->full_name }}</p></div>
-                    <div class="col-6"><label class="text-muted small">Reg Number</label><p class="mb-0 fw-semibold">{{ $application->reg_number }}</p></div>
-                    <div class="col-6"><label class="text-muted small">Gender</label><p class="mb-0">{{ ucfirst($application->gender) }}</p></div>
+                    <div class="col-6"><label class="text-muted small">Admission/Reg ID</label><p class="mb-0 fw-semibold">{{ $application->student_id }}</p></div>
+                    <div class="col-6"><label class="text-muted small">Gender</label><p class="mb-0"><span class="badge bg-light text-dark border">{{ ucfirst($application->gender) }}</span></p></div>
                     <div class="col-6"><label class="text-muted small">Date of Birth</label><p class="mb-0">{{ $application->date_of_birth->format('M d, Y') }}</p></div>
                     <div class="col-6"><label class="text-muted small">Phone</label><p class="mb-0">{{ $application->phone_number }}</p></div>
                     <div class="col-6"><label class="text-muted small">Email</label><p class="mb-0">{{ $application->email }}</p></div>
                     <div class="col-12"><label class="text-muted small">Home Address</label><p class="mb-0">{{ $application->home_address }}</p></div>
-                    <div class="col-4"><label class="text-muted small">Nationality</label><p class="mb-0">{{ $application->nationality }}</p></div>
-                    <div class="col-4"><label class="text-muted small">State</label><p class="mb-0">{{ $application->state_of_origin }}</p></div>
-                    <div class="col-4"><label class="text-muted small">LGA</label><p class="mb-0">{{ $application->local_government }}</p></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Academic Information -->
+    <!-- Academic & Preferences -->
     <div class="col-md-6">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white py-3">
-                <h6 class="mb-0 fw-bold"><i class="fas fa-graduation-cap me-2" style="color: #cc0000;"></i>Academic Information</h6>
+                <h6 class="mb-0 fw-bold"><i class="fas fa-graduation-cap me-2" style="color: #cc0000;"></i>Academic & Preferences</h6>
             </div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-6"><label class="text-muted small">Academic Year</label><p class="mb-0 fw-semibold">{{ $application->academic_year }}</p></div>
-                    <div class="col-6"><label class="text-muted small">Intake</label><p class="mb-0">{{ $application->intake }}</p></div>
                     <div class="col-6"><label class="text-muted small">Program</label><p class="mb-0">{{ $application->program }}</p></div>
                     <div class="col-6"><label class="text-muted small">Department</label><p class="mb-0">{{ $application->department }}</p></div>
-                    <div class="col-12"><label class="text-muted small">Amount Paid</label><p class="mb-0 fw-bold text-success">₦{{ number_format($application->amount_paid) }}</p></div>
+                    <div class="col-6"><label class="text-muted small">Intake</label><p class="mb-0 fw-semibold">{{ $application->intake }}</p></div>
+                    <div class="col-6"><label class="text-muted small">Academic Year</label><p class="mb-0">{{ $application->academic_year }}</p></div>
+                    <div class="col-6">
+                        <label class="text-muted small">Room Preference</label>
+                        <p class="mb-0">
+                            <span class="badge bg-secondary-subtle text-secondary border">
+                                {{ ucfirst($application->preferred_room_type ?: 'No Preference') }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-6">
+                        <label class="text-muted small">Payment Proof</label>
+                        <p class="mb-0 fw-bold text-success">Verified: ₦{{ number_format($application->amount_paid) }}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -218,47 +248,196 @@
     @endif
 </div>
 
-<!-- Status Update Modal -->
-<div class="modal fade" id="statusUpdateModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Update Application Status</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- MODALS -->
+
+<!-- Approve & Assign Modal -->
+<div class="modal fade" id="approveAssignModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white py-3">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-user-check me-2"></i>Approve & Assign Bed Space
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST" action="{{ route('applications.update-status', $application) }}">
+            <form method="POST" action="{{ route('applications.approve-assign', $application) }}">
                 @csrf
-                @method('PATCH')
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Status</label>
-                        <select name="status" id="status" class="form-select" required>
-                            <option value="pending">Pending</option>
-                            <option value="under_review">Under Review</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info small mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Select a hostel, room, and specific bed to complete the allocation.
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Admin Notes</label>
-                        <textarea name="admin_notes" class="form-control" rows="3">{{ $application->admin_notes }}</textarea>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-uppercase">1. Select Hostel</label>
+                            <select id="hostel_select" name="hostel_id" class="form-select select2" required>
+                                <option value="">-- Choose Hostel --</option>
+                                @foreach($hostels as $hostel)
+                                    @if(strtolower($hostel->type) == strtolower($application->gender))
+                                        <option value="{{ $hostel->id }}">{{ $hostel->name }} ({{ ucfirst($hostel->type) }})</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                            <small class="text-muted">Only {{ $application->gender }} hostels are shown.</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-uppercase">2. Select Room</label>
+                            <select id="room_select" name="room_id" class="form-select" disabled required>
+                                <option value="">-- Choose Hostel First --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <label class="form-label fw-bold small text-uppercase mb-3">3. Choose Available Bed Space</label>
+                            <div id="bed_selection_container" class="row g-2">
+                                <div class="col-12 text-center py-4 bg-light rounded border border-dashed">
+                                    <p class="text-muted mb-0">Select a room to see available beds</p>
+                                </div>
+                            </div>
+                            <input type="hidden" name="bed_id" id="selected_bed_id" required>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <label class="form-label fw-bold small text-uppercase">Admin Notes (Optional)</label>
+                            <textarea name="admin_notes" class="form-control" rows="3" placeholder="Any specific notes for this allocation..."></textarea>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update</button>
+                <div class="modal-footer bg-light p-3">
+                    <button type="button" class="btn btn-link text-secondary text-decoration-none" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold" id="submit_assign_btn" disabled>
+                        Confirm Allocation & Approve
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white py-3">
+                <h5 class="modal-title fw-bold">Reject Application</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ route('applications.reject', $application) }}">
+                @csrf
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-uppercase">Reason for Rejection <span class="text-danger">*</span></label>
+                        <textarea name="rejection_reason" class="form-control" rows="4" required 
+                                  placeholder="Provide a clear reason (e.g., Invalid payment proof, Incomplete documents, etc.)"></textarea>
+                        <small class="text-muted">This reason will be visible to the student on their dashboard.</small>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light p-3">
+                    <button type="button" class="btn btn-link text-secondary text-decoration-none" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger px-4 fw-bold">Confirm Rejection</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
 <script>
-function updateStatus(status) {
-    document.getElementById('status').value = status;
-    new bootstrap.Modal(document.getElementById('statusUpdateModal')).show();
+document.addEventListener('DOMContentLoaded', function() {
+    const hostelSelect = document.getElementById('hostel_select');
+    const roomSelect = document.getElementById('room_select');
+    const bedContainer = document.getElementById('bed_selection_container');
+    const selectedBedInput = document.getElementById('selected_bed_id');
+    const submitBtn = document.getElementById('submit_assign_btn');
+
+    // Load Rooms when Hostel changes
+    hostelSelect.addEventListener('change', function() {
+        const hostelId = this.value;
+        roomSelect.disabled = true;
+        roomSelect.innerHTML = '<option value="">Loading rooms...</option>';
+        bedContainer.innerHTML = '<div class="col-12 text-center py-4 bg-light rounded border border-dashed"><p class="text-muted mb-0">Select a room to see available beds</p></div>';
+        selectedBedInput.value = '';
+        submitBtn.disabled = true;
+
+        if (!hostelId) {
+            roomSelect.innerHTML = '<option value="">-- Choose Hostel First --</option>';
+            return;
+        }
+
+        fetch(`/applications/available-rooms/${hostelId}`)
+            .then(response => response.json())
+            .then(rooms => {
+                roomSelect.disabled = false;
+                roomSelect.innerHTML = '<option value="">-- Choose Room --</option>';
+                rooms.forEach(room => {
+                    roomSelect.innerHTML += `<option value="${room.id}">${room.room_number} (${room.room_type} - ${room.occupied}/${room.capacity})</option>`;
+                });
+            });
+    });
+
+    // Load Beds when Room changes
+    roomSelect.addEventListener('change', function() {
+        const roomId = this.value;
+        bedContainer.innerHTML = '<div class="col-12 text-center py-4"><div class="spinner-border spinner-border-sm text-primary"></div> Loading beds...</div>';
+        selectedBedInput.value = '';
+        submitBtn.disabled = true;
+
+        if (!roomId) {
+            bedContainer.innerHTML = '<div class="col-12 text-center py-4 bg-light rounded border border-dashed"><p class="text-muted mb-0">Select a room to see available beds</p></div>';
+            return;
+        }
+
+        fetch(`/applications/available-beds/${roomId}`)
+            .then(response => response.json())
+            .then(beds => {
+                bedContainer.innerHTML = '';
+                if (beds.length === 0) {
+                    bedContainer.innerHTML = '<div class="col-12 alert alert-warning small">No available beds in this room.</div>';
+                    return;
+                }
+
+                beds.forEach(bed => {
+                    bedContainer.innerHTML += `
+                        <div class="col-md-3 col-6 mb-2">
+                            <div class="bed-item p-3 border rounded text-center cursor-pointer hover-shadow transition-all h-100" 
+                                 data-bed-id="${bed.id}" onclick="selectBed(this, ${bed.id})">
+                                <i class="fas fa-bed fa-2x mb-2 text-secondary"></i>
+                                <div class="fw-bold small">Bed ${bed.bed_number}</div>
+                                <div class="text-success extra-small" style="font-size: 0.65rem;">AVAILABLE</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+    });
+});
+
+function selectBed(element, bedId) {
+    // Deselect others
+    document.querySelectorAll('.bed-item').forEach(el => {
+        el.classList.remove('border-primary', 'bg-primary-subtle', 'shadow-sm');
+        el.querySelector('i').classList.replace('text-primary', 'text-secondary');
+    });
+
+    // Select this one
+    element.classList.add('border-primary', 'bg-primary-subtle', 'shadow-sm');
+    element.querySelector('i').classList.replace('text-secondary', 'text-primary');
+    
+    document.getElementById('selected_bed_id').value = bedId;
+    document.getElementById('submit_assign_btn').disabled = false;
 }
 </script>
+
+<style>
+.cursor-pointer { cursor: pointer; }
+.hover-shadow:hover { shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important; }
+.transition-all { transition: all 0.2s ease; }
+.extra-small { font-size: 0.7rem; }
+.bed-item { background: #fff; }
+.bed-item.border-primary { border-width: 2px !important; }
+</style>
 @endpush

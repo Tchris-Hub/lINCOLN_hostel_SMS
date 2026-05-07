@@ -125,6 +125,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [HostelApplicationController::class, 'adminIndex'])->name('index');
         Route::get('/{application}', [HostelApplicationController::class, 'adminShow'])->name('show');
         Route::patch('/{application}/status', [HostelApplicationController::class, 'updateStatus'])->name('update-status');
+        
+        // New Allocation Flow Routes
+        Route::get('/available-rooms/{hostel}', [HostelApplicationController::class, 'getAvailableRooms'])->name('available-rooms');
+        Route::get('/available-beds/{room}', [HostelApplicationController::class, 'getAvailableBeds'])->name('available-beds');
+        Route::post('/{application}/approve-assign', [HostelApplicationController::class, 'approveAndAssign'])->name('approve-assign');
+        Route::post('/{application}/reject', [HostelApplicationController::class, 'reject'])->name('reject');
     });
 
     // Admin session status check route

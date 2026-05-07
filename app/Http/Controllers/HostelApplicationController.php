@@ -7,11 +7,17 @@ use Illuminate\Http\Request;
 use App\Mail\HostelApplicationMail;
 use App\Mail\AdminApplicationNotificationMail;
 use App\Models\HostelApplication;
+use App\Models\Hostel;
+use App\Models\Room;
+use App\Models\Bed;
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\Department;
 use App\Models\Intake;
@@ -240,7 +246,8 @@ class HostelApplicationController extends Controller
      */
     public function adminShow(HostelApplication $application)
     {
-        return view('admin.applications.show', compact('application'));
+        $hostels = Hostel::active()->get();
+        return view('admin.applications.show', compact('application', 'hostels'));
     }
 
     /**
@@ -286,5 +293,164 @@ class HostelApplicationController extends Controller
         }
 
         return redirect()->back()->with('success', 'Application status updated successfully.');
+    }
+
+    /**
+     * Get available rooms for a hostel.
+     */
+    public function getAvailableRooms(Hostel $hostel)
+    {
+        $rooms = Room::where('hostel_id', $hostel->id)
+            ->where('status', 'available')
+            ->whereRaw('occupied < capacity')
+            ->get(['id', 'room_number', 'occupied', 'capacity', 'room_type']);
+
+        return response()->json($rooms);
+    }
+
+    /**
+     * Get available beds for a room.
+     */
+    public function getAvailableBeds(Room $room)
+    {
+        $beds = Bed::where('room_id', $room->id)
+            ->where('is_occupied', false)
+            ->get(['id', 'bed_number', 'status']);
+
+        return response()->json($beds);
+    }
+
+    /**
+     * Approve and assign room/bed to student.
+     */
+    public function approveAndAssign(Request $request, HostelApplication $application)
+    {
+        $request->validate([
+            'hostel_id' => 'required|exists:hostels,id',
+            'room_id' => 'required|exists:rooms,id',
+            'bed_id' => 'required|exists:beds,id',
+            'admin_notes' => 'nullable|string',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $room = Room::findOrFail($request->room_id);
+            $bed = Bed::findOrFail($request->bed_id);
+
+            if ($room->occupied >= $room->capacity) {
+                return back()->with('error', 'Room is already full.');
+            }
+            if ($bed->is_occupied) {
+                return back()->with('error', 'Bed is already occupied.');
+            }
+
+            // 1. Find or Create Student & User
+            $student = Student::where('admission_number', $application->student_id)->first();
+            
+            if (!$student) {
+                // Check if user exists with this email
+                $user = User::where('email', $application->email)->first();
+                if (!$user) {
+                    $user = User::create([
+                        'name' => $application->full_name,
+                        'email' => $application->email,
+                        'password' => Hash::make('welcome123'),
+                        'role' => 'student',
+                    ]);
+                }
+
+                $student = Student::create([
+                    'user_id' => $user->id,
+                    'admission_number' => $application->student_id,
+                    'full_name' => $application->full_name,
+                    'email' => $application->email,
+                    'gender' => $application->gender,
+                    'date_of_birth' => $application->date_of_birth,
+                    'nationality' => $application->nationality,
+                    'state_of_origin' => $application->state_of_origin,
+                    'local_government' => $application->local_government,
+                    'department' => $application->department,
+                    'intake' => $application->intake,
+                    'semester' => 1,
+                    'contact_number' => $application->phone_number,
+                    'emergency_contact' => $application->emergency_contact_phone,
+                    'address' => $application->home_address,
+                    'parent_name' => $application->parent_full_name,
+                    'parent_relationship' => $application->parent_relationship,
+                    'parent_phone' => $application->parent_phone,
+                    'parent_email' => $application->parent_email,
+                    'parent_address' => $application->parent_address,
+                    'parent_occupation' => $application->parent_occupation,
+                    'application_id' => $application->id,
+                    'status' => 'active',
+                ]);
+            } else {
+                // Update existing student with latest application info
+                $student->update([
+                    'application_id' => $application->id,
+                    'department' => $application->department,
+                    'intake' => $application->intake,
+                ]);
+            }
+
+            // 2. Atomic Increment Room
+            Room::where('id', $room->id)->update([
+                'occupied' => DB::raw('occupied + 1'),
+                'status' => DB::raw('CASE WHEN occupied + 1 >= capacity THEN "full" ELSE "available" END'),
+            ]);
+
+            // 3. Update Bed status
+            $bed->update([
+                'is_occupied' => true,
+                'student_id' => $student->id
+            ]);
+
+            // 4. Update Student Record with room/bed and fees
+            $student->update([
+                'room_id' => $room->id,
+                'bed_id' => $bed->id,
+                'hostel_fee_amount' => $application->amount_paid,
+                'hostel_fee_paid' => $application->amount_paid,
+                'hostel_fee_status' => 'paid',
+                'check_in_date' => now(),
+                'expected_check_out_date' => now()->addMonths(4), // Default 1 semester
+            ]);
+
+            // 5. Finalize Application
+            $application->update([
+                'status' => 'approved',
+                'reviewed_by' => auth()->id(),
+                'reviewed_at' => now(),
+                'admin_notes' => $request->admin_notes,
+            ]);
+
+            DB::commit();
+            return redirect()->route('applications.show', $application)->with('success', 'Application approved and room assigned successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Illuminate\Support\Facades\Log::error('Allocation Failed: ' . $e->getMessage());
+            return back()->with('error', 'Allocation Failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reject application with reason.
+     */
+    public function reject(Request $request, HostelApplication $application)
+    {
+        $request->validate([
+            'rejection_reason' => 'required|string|max:500',
+        ]);
+
+        $application->update([
+            'status' => 'rejected',
+            'rejection_reason' => $request->rejection_reason,
+            'reviewed_at' => now(),
+            'reviewed_by' => auth()->id(),
+        ]);
+
+        return redirect()->route('applications.index')->with('success', 'Application rejected.');
     }
 }

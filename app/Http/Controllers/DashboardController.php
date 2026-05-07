@@ -58,6 +58,12 @@ class DashboardController extends Controller
             'pending_bookings_count' => Payment::where('status', 'pending')
                 ->whereNotNull('room_id')
                 ->count(),
+            
+            // Pending Hostel Applications (NEW FLOW)
+            'pending_applications_list' => \App\Models\HostelApplication::where('status', 'pending')
+                ->latest()
+                ->take(10)
+                ->get(),
         ];
 
         return view('admin.dashboard', $data);
