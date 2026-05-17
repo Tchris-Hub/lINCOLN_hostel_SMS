@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Department extends Model
 {
-    protected $fillable = ['name', 'is_active', 'sort_order'];
+    protected $fillable = ['name', 'code', 'description', 'is_active', 'sort_order'];
 
     public function scopeActive($query)
     {

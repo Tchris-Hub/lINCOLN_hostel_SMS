@@ -101,7 +101,7 @@
                     </div>
 
                     <div class="d-grid">
-                        <button type="submit" class="btn py-2" style="background-color: #cc0000; color: white;">
+                        <button type="submit" id="submitBtn" class="btn py-2" style="background-color: #cc0000; color: white;">
                             <i class="fas fa-paper-plane me-2"></i> Submit Application
                         </button>
                     </div>
@@ -115,4 +115,18 @@
 .cursor-pointer { cursor: pointer; }
 .bg-light-hover:hover { background-color: var(--bg-primary); }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if(form && submitBtn) {
+        form.addEventListener('submit', function() {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Submitting...';
+        });
+    }
+});
+</script>
 @endsection

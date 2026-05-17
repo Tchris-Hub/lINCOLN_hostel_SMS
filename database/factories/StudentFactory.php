@@ -22,11 +22,17 @@ class StudentFactory extends Factory
         $fullName = "$firstName $lastName";
         $dept = $this->faker->randomElement(['Computer Science', 'Business Administration', 'Mass Communication', 'Accounting']);
         $year = $this->faker->randomElement(['2024', '2025', '2026']);
-        $randSeq = str_pad($this->faker->unique()->numberBetween(1, 9999), 4, '0', STR_PAD_LEFT);
-        $matric = "$year/".substr(strtoupper($dept), 0, 3)."/$randSeq";
+        
+        // Match real DB formats: numeric strings OR 'LUC-NGA-...'
+        $format = $this->faker->randomElement(['numeric', 'structured']);
+        if ($format === 'numeric') {
+            $admissionNumber = '010' . $this->faker->unique()->numberBetween(10000000, 99999999);
+        } else {
+            $admissionNumber = 'LUC-NGA-' . str_pad($this->faker->numberBetween(1, 999), 3, '0', STR_PAD_LEFT) . '-ADM-' . $this->faker->unique()->numberBetween(100000, 999999);
+        }
 
         return [
-            'admission_number' => $matric,
+            'admission_number' => $admissionNumber,
             'full_name' => $fullName,
             'email' => strtolower($firstName . '.' . $lastName . '@lincoln.edu.ng'),
             'gender' => $gender,

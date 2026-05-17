@@ -8,8 +8,9 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class LeaveStatusUpdateMail extends Mailable
+class LeaveStatusUpdateMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -32,8 +33,12 @@ class LeaveStatusUpdateMail extends Mailable
 
     public function content(): Content
     {
+        $view = $this->leaveRequest->status === 'approved' 
+            ? 'emails.students.leave_approved' 
+            : 'emails.students.leave_rejected';
+
         return new Content(
-            view: 'emails.leave_status_update',
+            markdown: $view,
             with: [
                 'leaveRequest' => $this->leaveRequest,
                 'student' => $this->leaveRequest->student,

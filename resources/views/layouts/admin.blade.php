@@ -370,13 +370,7 @@
                     <i class="fas fa-calendar-check"></i><span>Intakes</span>
                 </a>
 
-                <a class="nav-link {{ request('type') == 'booking' ? 'active' : '' }}" href="{{ route('payments.index', ['type' => 'booking', 'status' => 'pending']) }}">
-                    <i class="fas fa-home"></i><span>Room Bookings</span>
-                    @php $pendingBookingsCount = \App\Models\Payment::where('status', 'pending')->whereNotNull('room_id')->count(); @endphp
-                    @if($pendingBookingsCount > 0)
-                        <span class="badge bg-warning text-dark">{{ $pendingBookingsCount }}</span>
-                    @endif
-                </a>
+                {{-- Room Bookings removed as allocation is now admin-controlled --}}
                 
                 <!-- Student Management -->
                 <div class="nav-section-title">Students</div>

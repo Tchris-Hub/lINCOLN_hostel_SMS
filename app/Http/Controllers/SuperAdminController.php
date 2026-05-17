@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use App\Models\SuperAdmin;
 use App\Models\User;
@@ -30,19 +32,30 @@ class SuperAdminController extends Controller
      */
     public function login(Request $request)
     {
-        $request->validate([
+        $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
 
-        $superAdmin = SuperAdmin::where('email', $request->email)->first();
+        $throttleKey = Str::lower($credentials['email']) . '|' . $request->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            return back()->withErrors([
+                'email' => 'Too many login attempts. Please try again in ' . $seconds . ' seconds.',
+            ])->withInput();
+        }
+
+        $superAdmin = SuperAdmin::where('email', $credentials['email'])->first();
 
         if (!$superAdmin) {
+            RateLimiter::hit($throttleKey, 60);
             return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
         }
 
         // Check if account is active
         if (!$superAdmin->is_active) {
+            RateLimiter::hit($throttleKey, 60);
             return back()->withErrors(['email' => 'Your account has been deactivated'])->withInput();
         }
 
@@ -51,12 +64,14 @@ class SuperAdminController extends Controller
             return back()->withErrors(['email' => 'Account is temporarily locked due to multiple failed attempts'])->withInput();
         }
 
-        if (Auth::guard('superadmin')->attempt(['email' => $request->email, 'password' => $request->password], $request->remember)) {
+        if (Auth::guard('superadmin')->attempt(['email' => $credentials['email'], 'password' => $credentials['password']], $request->remember)) {
+            RateLimiter::clear($throttleKey);
             $superAdmin->resetLoginAttempts();
             return redirect()->route('superadmin.dashboard');
         }
 
         // Increment failed attempts
+        RateLimiter::hit($throttleKey, 60);
         $superAdmin->incrementLoginAttempts();
 
         return back()->withErrors(['email' => 'Invalid credentials'])->withInput();

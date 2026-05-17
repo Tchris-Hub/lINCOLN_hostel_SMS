@@ -21,8 +21,22 @@
             <div class="card-header bg-white py-3">
                 <h6 class="mb-0 fw-bold"><i class="fas fa-building me-2" style="color: #cc0000;"></i>Create New Hostel</h6>
             </div>
-                <div class="card-body">
-                    <form action="{{ route('hostels.store') }}" method="POST" enctype="multipart/form-data">
+            <div class="card-body">
+                <div class="alert alert-info border-0 shadow-sm mb-4" style="background-color: #f8f9fa; border-left: 4px solid #3498db !important;">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-info-circle fa-2x text-info"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Capacity Management</h6>
+                            <p class="small text-muted mb-0">
+                                Hostel capacity and room counts are calculated automatically based on the rooms you add to this hostel later. You don't need to specify them here.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <form action="{{ route('hostels.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         <div class="row">

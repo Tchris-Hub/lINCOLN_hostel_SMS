@@ -51,7 +51,7 @@
 }
 
 body {
-  font-family: "Open Sans", sans-serif;
+  font-family: "Poppins", sans-serif;
   color: var(--text-primary);
   background-color: var(--bg-primary);
 }
@@ -72,7 +72,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Roboto", sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 /*--------------------------------------------------------------
@@ -291,7 +291,7 @@ h6 {
 }
 
 #header .logo img {
-  max-height: 40px;
+  max-height: 100%;
 }
 
 .scrolled-offset {
@@ -303,15 +303,31 @@ h6 {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  height: 86px;
+  transition: all 0.5s;
+  flex-shrink: 0;
+}
+
+#header.fixed-top .logo-container {
+  height: 70px;
 }
 
 .logo-container img {
-  height: 50px;
+  max-height: 100%;
   width: auto;
-  max-width: 50px;
+  max-width: 280px;
   object-fit: contain;
-  object-position: center;
+  object-position: left;
   transition: all 0.3s ease;
+  padding: 8px 0;
+  box-sizing: border-box;
+}
+
+.logo-container a {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .logo-text {
@@ -683,7 +699,7 @@ h6 {
 }
 
 #hero .btn-get-started {
-  font-family: "Roboto", sans-serif;
+  font-family: "Poppins", sans-serif;
   text-transform: uppercase;
   font-weight: 500;
   font-size: 14px;
@@ -1050,7 +1066,6 @@ section {
 .counts .count-box p {
   padding: 0;
   margin: 0;
-  font-family: "Roboto", sans-serif;
   font-size: 14px;
   color: var(--text-secondary);
 }
@@ -1294,7 +1309,6 @@ section {
 .faq .faq-list .question {
   display: block;
   position: relative;
-  font-family: var(--primary-color);
   font-size: 18px;
   line-height: 24px;
   font-weight: 400;

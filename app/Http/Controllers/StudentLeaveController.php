@@ -29,6 +29,11 @@ class StudentLeaveController extends Controller
 
     public function store(Request $request)
     {
+        Log::info('Leave request submission attempt', [
+            'student_id' => Auth::guard('student')->id(),
+            'ip' => $request->ip()
+        ]);
+
         $request->validate([
             'type' => 'required|in:medical,home,other',
             'start_date' => 'required|date|after_or_equal:today',

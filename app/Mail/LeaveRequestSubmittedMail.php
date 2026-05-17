@@ -8,8 +8,9 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class LeaveRequestSubmittedMail extends Mailable
+class LeaveRequestSubmittedMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -34,7 +35,7 @@ class LeaveRequestSubmittedMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.leave_request_submitted',
+            markdown: 'emails.students.leave_submitted',
             with: [
                 'leaveRequest' => $this->leaveRequest,
                 'student' => $this->leaveRequest->student,

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use App\Models\Student;
 
 class StudentsAuthController extends Controller
@@ -26,12 +28,22 @@ class StudentsAuthController extends Controller
             'contact_number' => 'required|string',
         ]);
 
+        $throttleKey = Str::lower($credentials['admission_number']) . '|' . $request->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            return back()->withErrors([
+                'admission_number' => 'Too many login attempts. Please try again in ' . $seconds . ' seconds.',
+            ])->withInput();
+        }
+
         // Attempt to find the student with provided credentials
         $student = Student::where('admission_number', $credentials['admission_number'])
                           ->where('contact_number', $credentials['contact_number'])
                           ->first();
 
         if ($student) {
+            RateLimiter::clear($throttleKey);
             // Login the student using the student guard
             Auth::guard('student')->login($student);
 
@@ -41,6 +53,8 @@ class StudentsAuthController extends Controller
             // Redirect to student dashboard
             return redirect()->intended(route('student.dashboard'));
         }
+
+        RateLimiter::hit($throttleKey, 60);
 
         // Invalid credentials
         return back()->withErrors([

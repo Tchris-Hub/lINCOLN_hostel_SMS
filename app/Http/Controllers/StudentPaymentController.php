@@ -53,6 +53,14 @@ class StudentPaymentController extends Controller
             $payment->receipt_path = $filePath;
             $payment->save();
 
+            // SEND EMAIL NOTIFICATION (New)
+            try {
+                \Illuminate\Support\Facades\Mail::to($student->email)
+                    ->send(new \App\Mail\PaymentReceivedMail($payment));
+            } catch (\Exception $e) {
+                \Log::error('General Payment Received Email Failed: ' . $e->getMessage());
+            }
+
             // Notify Admins
             \App\Models\Notification::notifyAllAdmins(
                 'payment',

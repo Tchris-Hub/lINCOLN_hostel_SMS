@@ -112,7 +112,15 @@ class StudentsDashboardController extends Controller
 
         $room = $student->room;
         $hostel = $room->hostel;
-        $roommates = $room->students->where('id', '!=', $student->id);
+        $roommates = $student->room->students()->select([
+            'students.id', 
+            'students.full_name', 
+            'students.department', 
+            'students.bed_number', 
+            'students.check_in_date', 
+            'students.status', 
+            'students.gender'
+        ])->where('students.id', '!=', $student->id)->get();
 
         return view('student.room.details', compact('student', 'room', 'hostel', 'roommates'));
     }
@@ -469,6 +477,14 @@ class StudentsDashboardController extends Controller
             "You will be notified once an admin approves your booking and assigns your room.",
             ['payment_id' => $payment->id, 'room_id' => $room->id]
         );
+
+        // SEND EMAIL NOTIFICATION (New)
+        try {
+            \Illuminate\Support\Facades\Mail::to($student->email)
+                ->send(new \App\Mail\BookingPaymentReceivedMail($payment));
+        } catch (\Exception $e) {
+            \Log::error('Booking Received Email Failed: ' . $e->getMessage());
+        }
 
         return redirect()->route('student.dashboard')
             ->with('success', 'Booking payment submitted successfully! Your room will be assigned once the admin approves your payment. We will notify you.');

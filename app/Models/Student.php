@@ -181,16 +181,10 @@ class Student extends Authenticatable
      */
     public function getBedNumberAttribute()
     {
-        if (!$this->room) {
-            return null;
+        if ($this->bed) {
+            return $this->bed->bed_number;
         }
-        
-        $roomStudents = $this->room->students()->orderBy('check_in_date')->get();
-        $position = $roomStudents->search(function($student) {
-            return $student->id === $this->id;
-        });
-        
-        return $position !== false ? $position + 1 : null;
+        return null;
     }
 
     // ==================== PAYMENT & FEE INFO ====================

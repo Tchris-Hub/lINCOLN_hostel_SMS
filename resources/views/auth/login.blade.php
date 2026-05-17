@@ -15,8 +15,6 @@
         
         // Apply theme immediately to prevent flash
         document.documentElement.setAttribute('data-theme', theme);
-        document.body = document.body || document.createElement('body');
-        document.body.setAttribute('data-theme', theme);
         
         // Also set a class on html for immediate CSS targeting
         document.documentElement.className = theme + '-theme';

@@ -227,6 +227,14 @@ class PaymentController extends Controller
                 'Congratulations! Your payment of ₦' . number_format($payment->amount, 2) . ' has been approved. You have been assigned to Room ' . $room->room_number . ' in ' . $room->hostel->name . '. Welcome to your new home!',
                 ['payment_id' => $payment->id, 'room_id' => $room->id]
             );
+            
+            // SEND EMAIL NOTIFICATION (New)
+            try {
+                \Illuminate\Support\Facades\Mail::to($student->email)
+                    ->send(new \App\Mail\RoomAssignedMail($student, $room));
+            } catch (\Exception $e) {
+                \Log::error('Room Assigned Email Failed: ' . $e->getMessage());
+            }
 
             // Notify Parent (Rule 2.5)
             $this->notifyParentOfPayment($student, "LincHostel: Your ward {$student->full_name}'s room booking payment has been approved. Room {$room->room_number} assigned.");
@@ -235,7 +243,23 @@ class PaymentController extends Controller
             
         } else {
             // Regular payment (not a booking)
-            $payment->update(['status' => 'completed']);
+            \DB::transaction(function () use ($payment) {
+                $payment->update(['status' => 'completed']);
+                $student = $payment->student;
+                
+                // Update student balances
+                $student->hostel_fee_paid = ($student->hostel_fee_paid ?? 0) + $payment->amount;
+                
+                // Update fee status if applicable
+                if ($student->hostel_fee_paid >= $student->hostel_fee_amount) {
+                     $student->hostel_fee_status = 'paid';
+                } elseif ($student->hostel_fee_paid > 0) {
+                     $student->hostel_fee_status = 'partial';
+                }
+                
+                $student->save();
+            });
+
             $student = $payment->student;
 
             // Notify Student
@@ -246,6 +270,14 @@ class PaymentController extends Controller
                 'Your payment of ₦' . number_format($payment->amount, 2) . ' has been approved and processed successfully.',
                 ['payment_id' => $payment->id]
             );
+
+            // SEND EMAIL NOTIFICATION (New)
+            try {
+                \Illuminate\Support\Facades\Mail::to($student->email)
+                    ->send(new \App\Mail\GeneralPaymentApprovedMail($payment));
+            } catch (\Exception $e) {
+                \Log::error('General Payment Approved Email Failed: ' . $e->getMessage());
+            }
 
             // Notify Parent (Rule 2.5)
             $this->notifyParentOfPayment($student, "LincHostel: Your ward {$student->full_name}'s payment of ₦" . number_format($payment->amount, 2) . " has been approved.");

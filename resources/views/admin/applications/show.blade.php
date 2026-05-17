@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="bed-item p-3 border rounded text-center cursor-pointer hover-shadow transition-all h-100" 
                                  data-bed-id="${bed.id}" onclick="selectBed(this, ${bed.id})">
                                 <i class="fas fa-bed fa-2x mb-2 text-secondary"></i>
-                                <div class="fw-bold small">Bed ${bed.bed_number}</div>
+                                <div class="fw-bold small">${bed.bed_number}</div>
                                 <div class="text-success extra-small" style="font-size: 0.65rem;">AVAILABLE</div>
                             </div>
                         </div>

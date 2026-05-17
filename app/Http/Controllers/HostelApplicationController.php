@@ -141,7 +141,7 @@ class HostelApplicationController extends Controller
             // Send emails (non-breaking if they fail)
             try {
                 // Send email to student
-                Mail::to($validated['email'])->send(new HostelApplicationMail($application));
+                Mail::to($validated['email'])->send(new \App\Mail\ApplicationReceivedMail($application));
 
                 // Send notification to all admin users
                 $adminUsers = User::where('is_admin', true)->where('is_active', true)->get();
@@ -232,11 +232,23 @@ class HostelApplicationController extends Controller
         $query = HostelApplication::with('reviewer');
         
         // Filter by status if provided
-        if ($request->has('status') && $request->status) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('application_number', 'like', "%{$search}%")
+                  ->orWhere('full_name', 'like', "%{$search}%")
+                  ->orWhere('student_id', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone_number', 'like', "%{$search}%");
+            });
+        }
         
-        $applications = $query->orderBy('created_at', 'desc')->paginate(20);
+        $applications = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
             
         return view('admin.applications.index', compact('applications'));
     }
@@ -269,7 +281,14 @@ class HostelApplicationController extends Controller
 
         // Send status update email to student
         try {
-            Mail::to($application->email)->send(new \App\Mail\ApplicationStatusUpdateMail($application));
+            if ($application->status === 'approved') {
+                Mail::to($application->email)->send(new \App\Mail\ApplicationApprovedMail($application));
+            } elseif ($application->status === 'rejected') {
+                Mail::to($application->email)->send(new \App\Mail\ApplicationRejectedMail($application));
+            } else {
+                // For 'under_review' or others, use a generic status update if needed
+                Mail::to($application->email)->send(new \App\Mail\ApplicationStatusUpdateMail($application));
+            }
         } catch (Exception $e) {
             // Log the error but don't fail the status update
             \Log::error('Failed to send status update email: ' . $e->getMessage());
@@ -315,7 +334,7 @@ class HostelApplicationController extends Controller
     {
         $beds = Bed::where('room_id', $room->id)
             ->where('is_occupied', false)
-            ->get(['id', 'bed_number', 'status']);
+            ->get(['id', 'bed_number', 'is_occupied']);
 
         return response()->json($beds);
     }
@@ -426,6 +445,15 @@ class HostelApplicationController extends Controller
             ]);
 
             DB::commit();
+
+            // Send notification email to student
+            try {
+                Mail::to($application->email)->send(new \App\Mail\ApplicationApprovedMail($application));
+            } catch (\Exception $e) {
+                \Log::error('Status Update Email Failed: ' . $e->getMessage());
+                // Non-blocking error, we still redirect with success but mention the email failure if needed
+            }
+
             return redirect()->route('applications.show', $application)->with('success', 'Application approved and room assigned successfully!');
 
         } catch (\Exception $e) {
@@ -450,6 +478,13 @@ class HostelApplicationController extends Controller
             'reviewed_at' => now(),
             'reviewed_by' => auth()->id(),
         ]);
+
+        // Send notification email
+        try {
+            \Illuminate\Support\Facades\Mail::to($application->email)->send(new \App\Mail\ApplicationRejectedMail($application));
+        } catch (\Exception $e) {
+            \Log::error('Rejection Email Failed: ' . $e->getMessage());
+        }
 
         return redirect()->route('applications.index')->with('success', 'Application rejected.');
     }

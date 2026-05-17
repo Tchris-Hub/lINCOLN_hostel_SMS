@@ -13,6 +13,20 @@ class LoginController extends Controller
 
     protected $redirectTo = '/dashboard';
 
+    /**
+     * The maximum number of attempts to allow.
+     *
+     * @var int
+     */
+    protected $maxAttempts = 5;
+
+    /**
+     * The number of minutes to delay further attempts.
+     *
+     * @var int
+     */
+    protected $decayMinutes = 1;
+
     public function __construct()
     {
         $this->middleware('guest')->except('logout');

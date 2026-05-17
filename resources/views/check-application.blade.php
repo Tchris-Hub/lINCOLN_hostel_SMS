@@ -76,7 +76,7 @@
             box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.1);
         }
         
-        .btn-check {
+        .btn-submit-app {
             background: linear-gradient(135deg, #cc0000, #990000);
             color: white;
             border: none;
@@ -89,7 +89,7 @@
             cursor: pointer;
         }
         
-        .btn-check:hover {
+        .btn-submit-app:hover {
             background: linear-gradient(135deg, #990000, #660000);
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(204, 0, 0, 0.3);
@@ -151,12 +151,12 @@
                            placeholder="Enter your application number" 
                            required>
                     <div class="example-format">
-                        <strong>Format example:</strong> LH202601001, LH202601002, etc.
+                        <strong>Format example:</strong> LH2026030001
                     </div>
                 </div>
                 
-                <button type="submit" class="btn-check">
-                    <i class="fas fa-search me-2"></i>Check Status
+                <button type="submit" class="btn-submit-app">
+                    <i class="fas fa-search me-2"></i>Check Application Status
                 </button>
             </form>
 
@@ -165,7 +165,7 @@
                 <h6><i class="fas fa-info-circle me-2"></i>How to find your application number:</h6>
                 <ul class="mb-0">
                     <li>Check the confirmation email sent after submitting your application</li>
-                    <li>Look for the application number in the format: LH + Year + Month + Sequential Number</li>
+                    <li>Look for the application number in the format: LH + Year + Month + 4-digit number (e.g. LH2026030001)</li>
                     <li>Contact the hostel office if you can't find your application number</li>
                 </ul>
             </div>
@@ -199,7 +199,7 @@
         document.getElementById('application_number').addEventListener('input', function(e) {
             let value = e.target.value.toUpperCase();
             
-            // Remove any non-alphanumeric characters except for the format we want
+            // Remove any non-alphanumeric characters
             value = value.replace(/[^A-Z0-9]/g, '');
             
             e.target.value = value;

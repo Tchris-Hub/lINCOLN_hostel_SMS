@@ -110,8 +110,7 @@ They are what the system currently does. You must treat them as facts.
   `hostel_applications` for the same student ID as a failover. This failover must not be
   broken.
 - SMS is formatted for Nigerian country codes (+234). Messages are ≤160 characters.
-- Parents are notified **only on approval**. Students are notified on both approval and
-  rejection. This asymmetry is intentional.
+- Parents are notified on **submission, approval, and rejection**. This ensures full transparency for guardians across the entire leave request lifecycle.
 - Notification icons follow this mapping (do not change):
   - `leave_approved` → Success Green
   - `announcement` → Warning Yellow
@@ -251,9 +250,7 @@ entire changeset without review.
    The block is a business rule, not a bug. Do not add an override without explicit
    product sign-off.
 
-10. **Never send a parent notification on rejection.** The asymmetry (student gets both,
-    parent gets approval only) is intentional and must be preserved in all notification
-    refactors.
+10. **Ensure parents are notified at all stages.** (This rule was updated to enforce parent notifications across all stages of a leave request: submission, approval, and rejection, superseding the previous asymmetry rule).
 
 11. **Never move Admin logic into a Student controller or vice versa.** Even for
     "convenience". The auth guards are the security boundary. Crossing them in code is a
@@ -386,7 +383,8 @@ documented in the PR.
 
 ### Notification Tests
 - [ ] Leave approval triggers both student email and parent SMS/email
-- [ ] Leave rejection triggers only student notification (no parent notification)
+- [ ] Leave rejection triggers both student notification and parent notification
+- [ ] Leave submission triggers both student notification and parent notification
 - [ ] Leave approval with missing parental profile falls back to `hostel_applications` data
 - [ ] Built SMS messages are ≤ 160 characters including dynamic values
 

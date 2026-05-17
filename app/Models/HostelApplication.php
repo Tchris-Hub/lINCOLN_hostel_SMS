@@ -118,13 +118,16 @@ class HostelApplication extends Model
      */
     public static function generateApplicationNumber()
     {
-        $year = date('Y');
-        $month = date('m');
+        $year  = date('Y'); // e.g. 2026
+        $month = date('m'); // e.g. 03, 04
+
+        // Count applications in the current month to get the sequence
         $count = self::whereYear('created_at', $year)
-                    ->whereMonth('created_at', $month)
-                    ->count() + 1;
-        
-        return "LH{$year}{$month}" . str_pad($count, 4, '0', STR_PAD_LEFT);
+                      ->whereMonth('created_at', $month)
+                      ->count() + 1;
+
+        // Format: LH + YYYY + MM + 4-digit sequence → e.g. LH2026050001
+        return 'LH' . $year . $month . str_pad($count, 4, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -140,7 +143,7 @@ class HostelApplication extends Model
      */
     public function student()
     {
-        return $this->belongsTo(Student::class, 'student_id');
+        return $this->hasOne(Student::class, 'admission_number', 'student_id');
     }
 
     /**

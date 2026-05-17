@@ -325,10 +325,11 @@
                 <a class="nav-link {{ request()->routeIs('student.room.*') ? 'active' : '' }}" href="{{ route('student.room.details') }}">
                     <i class="fas fa-door-open"></i><span>My Room</span>
                 </a>
+                @else
+                <div class="nav-link disabled text-muted">
+                    <i class="fas fa-bed"></i><span>No Room Assigned</span>
+                </div>
                 @endif
-                <a class="nav-link {{ request()->routeIs('student.hostels.*') ? 'active' : '' }}" href="{{ route('student.hostels.index') }}">
-                    <i class="fas fa-building"></i><span>Browse Hostels</span>
-                </a>
                 <a class="nav-link {{ request()->routeIs('student.hostel.rules') ? 'active' : '' }}" href="{{ route('student.hostel.rules') }}">
                     <i class="fas fa-book"></i><span>Hostel Rules</span>
                 </a>

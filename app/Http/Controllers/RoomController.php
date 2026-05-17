@@ -59,7 +59,16 @@ class RoomController extends Controller
             $validated['facilities'] = array_filter($request->facilities);
         }
 
-        Room::create($validated);
+        $room = Room::create($validated);
+
+        // Generate associated beds based on capacity
+        for ($i = 1; $i <= $room->capacity; $i++) {
+            \App\Models\Bed::create([
+                'room_id' => $room->id,
+                'bed_number' => 'Bed ' . $i,
+                'is_occupied' => false,
+            ]);
+        }
 
         return redirect()->route('rooms.index')->with('success', 'Room created successfully!');
     }
@@ -98,6 +107,30 @@ class RoomController extends Controller
         }
 
         $room->update($validated);
+
+        $currentBedsCount = \App\Models\Bed::where('room_id', $room->id)->count();
+        
+        if ($room->capacity > $currentBedsCount) {
+            // Add missing beds
+            for ($i = $currentBedsCount + 1; $i <= $room->capacity; $i++) {
+                \App\Models\Bed::create([
+                    'room_id' => $room->id,
+                    'bed_number' => 'Bed ' . $i,
+                    'is_occupied' => false,
+                ]);
+            }
+        } elseif ($room->capacity < $currentBedsCount) {
+            // Delete extra unoccupied beds
+            $extraBeds = \App\Models\Bed::where('room_id', $room->id)
+                ->where('is_occupied', false)
+                ->orderBy('id', 'desc')
+                ->limit($currentBedsCount - $room->capacity)
+                ->get();
+                
+            foreach ($extraBeds as $bed) {
+                $bed->delete();
+            }
+        }
 
         return redirect()->route('rooms.index')->with('success', 'Room updated successfully!');
     }

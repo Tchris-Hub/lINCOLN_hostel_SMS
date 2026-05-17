@@ -4,6 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Student;
+use App\Models\Hostel;
+use App\Models\Room;
+use App\Models\Bed;
 use Illuminate\Support\Facades\Hash;
 
 class StudentsTableSeeder extends Seeder
@@ -54,6 +57,30 @@ class StudentsTableSeeder extends Seeder
                 'payment_date' => now(),
                 'is_read' => 0,
             ]);
+
+            // Assign a room and bed if available
+            $hostel = Hostel::where('type', strtolower($student->gender))->first();
+            if ($hostel) {
+                $room = $hostel->rooms()->whereRaw('occupied < capacity')->first();
+                if ($room) {
+                    $bed = $room->beds()->where('is_occupied', false)->first();
+                    if ($bed) {
+                        $student->update([
+                            'room_id' => $room->id,
+                            'bed_id' => $bed->id,
+                            'hostel_fee_status' => 'paid',
+                            'hostel_fee_amount' => $application->amount_paid,
+                            'hostel_fee_paid' => $application->amount_paid,
+                            'check_in_date' => now(),
+                        ]);
+                        $bed->update(['is_occupied' => true, 'student_id' => $student->id]);
+                        $room->increment('occupied');
+                        if ($room->occupied >= $room->capacity) {
+                            $room->update(['status' => 'full']);
+                        }
+                    }
+                }
+            }
         }
 
         $this->command->info('Generated 50 hostel applications and payments for the students.');

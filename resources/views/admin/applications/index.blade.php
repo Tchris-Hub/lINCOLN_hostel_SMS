@@ -15,18 +15,38 @@
 </div>
 
 <div class="card border-0 shadow-sm">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+    <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
         <h6 class="mb-0 fw-bold"><i class="fas fa-file-alt me-2" style="color: #cc0000;"></i>Hostel Applications</h6>
-        <div class="dropdown">
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                <i class="fas fa-filter me-1"></i>Filter
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="{{ route('applications.index') }}">All</a></li>
-                <li><a class="dropdown-item" href="{{ route('applications.index', ['status' => 'pending']) }}">Pending</a></li>
-                <li><a class="dropdown-item" href="{{ route('applications.index', ['status' => 'approved']) }}">Approved</a></li>
-                <li><a class="dropdown-item" href="{{ route('applications.index', ['status' => 'rejected']) }}">Rejected</a></li>
-            </ul>
+        
+        <div class="d-flex align-items-center gap-2 flex-grow-1 flex-md-grow-0">
+            <form action="{{ route('applications.index') }}" method="GET" class="d-flex gap-2">
+                @if(request('status'))
+                    <input type="hidden" name="status" value="{{ request('status') }}">
+                @endif
+                <div class="input-group input-group-sm">
+                    <input type="text" name="search" class="form-control" placeholder="Search student name, ID..." value="{{ request('search') }}">
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    @if(request('search'))
+                        <a href="{{ route('applications.index', request()->only('status')) }}" class="btn btn-outline-secondary" title="Clear Search">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    @endif
+                </div>
+            </form>
+
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-filter me-1"></i>Filter
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                    <li><a class="dropdown-item @if(!request('status')) active @endif" href="{{ route('applications.index', request()->only('search')) }}">All</a></li>
+                    <li><a class="dropdown-item @if(request('status') == 'pending') active @endif" href="{{ route('applications.index', array_merge(request()->only('search'), ['status' => 'pending'])) }}">Pending</a></li>
+                    <li><a class="dropdown-item @if(request('status') == 'approved') active @endif" href="{{ route('applications.index', array_merge(request()->only('search'), ['status' => 'approved'])) }}">Approved</a></li>
+                    <li><a class="dropdown-item @if(request('status') == 'rejected') active @endif" href="{{ route('applications.index', array_merge(request()->only('search'), ['status' => 'rejected'])) }}">Rejected</a></li>
+                </ul>
+            </div>
         </div>
     </div>
     <div class="table-responsive">
@@ -48,7 +68,7 @@
                     <td class="ps-3"><strong class="text-primary">{{ $application->application_number }}</strong></td>
                     <td>
                         <strong>{{ $application->full_name }}</strong><br>
-                        <small class="text-muted">{{ $application->reg_number }}</small>
+                        <small class="text-muted">{{ $application->student_id }}</small>
                     </td>
                     <td>
                         <small>{{ $application->email }}</small><br>

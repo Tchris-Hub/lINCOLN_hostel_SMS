@@ -226,7 +226,7 @@
             </p>
             @if($application->reviewed_at)
                 <p class="mb-0 mt-2">
-                    <small>Last updated: {{ $application->reviewed_at->format('M d, Y H:i A') }}</small>
+                    <small>Last updated: {{ optional($application->reviewed_at)->format('M d, Y H:i A') ?? 'N/A' }}</small>
                 </p>
             @endif
         </div>
@@ -301,7 +301,7 @@
             <div class="timeline">
                 <div class="timeline-item">
                     <h6><i class="fas fa-paper-plane text-primary me-2"></i>Application Submitted</h6>
-                    <p class="mb-0">{{ $application->created_at->format('M d, Y H:i A') }}</p>
+                    <p class="mb-0">{{ optional($application->created_at)->format('M d, Y H:i A') ?? 'N/A' }}</p>
                     <small class="text-muted">Your application was successfully submitted and is in our system.</small>
                 </div>
                 
@@ -316,7 +316,7 @@
                             <i class="fas fa-search text-info me-2"></i>Under Review
                         @endif
                     </h6>
-                    <p class="mb-0">{{ $application->reviewed_at->format('M d, Y H:i A') }}</p>
+                    <p class="mb-0">{{ optional($application->reviewed_at)->format('M d, Y H:i A') ?? 'N/A' }}</p>
                     <small class="text-muted">
                         @if($application->status === 'approved')
                             Congratulations! Your application has been approved.
